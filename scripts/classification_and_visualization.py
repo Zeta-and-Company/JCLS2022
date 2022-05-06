@@ -24,7 +24,7 @@ from itertools import product
 import warnings
 warnings.filterwarnings("ignore")
 
-os.chdir(r'C:\Workstation\Trier\Papers_submitted\JCLS_2022')
+os.chdir(r'C:\Workstation\Trier\Github\JCLS2022_submission')
 
 parameters_lines = open(r'C:\Workstation\Trier\pydistinto\scripts\parameters.txt', 'r', encoding='utf-8').read().split('\n')
 parameters = {}
@@ -190,10 +190,10 @@ g.set_xticklabels(rotation=30)
 # Visualizing F1-distributions and baseline
 language = 'fra_80s'
 output_df = pd.read_csv(r'results\classification_results_' + language + '.csv', sep='\t')
-output_df = output_df.loc[output_df['classifier'] == 'LinearSVC']
+output_df = output_df.loc[output_df['classifier'] == 'LogisticRegression']
 output_df = output_df.loc[output_df['measure'] != 'KL_Divergence']
 to_visual_random = pd.read_csv(r'results\random_words_classification_results_' + language + '.csv', sep='\t')
-to_visual_random = to_visual_random.loc[to_visual_random['classifier'] == 'LinearSVC']
+to_visual_random = to_visual_random.loc[to_visual_random['classifier'] == 'LogisticRegression']
 
 output_df = output_df.sort_values(by=['f1_macro_mean'])
 order = ['RRF', 'χ2', 'LLR', 'Welch', 'Wilcoxon', 'TF-IDF', 'Eta', 'Zeta_orig', 'Zeta_log']
@@ -219,8 +219,10 @@ measures = ['RRF', 'χ2', 'LLR', 'Welch', 'Wilcoxon', 'TF-IDF', 'Eta', 'Zeta_ori
 pairs_measure = list(product(measures, measures))
 pairs_n = list(product(ns, ns))
 
-language = 'cze'
+language = 'fra_90s'
 output_df = pd.read_csv(r'results\classification_results_' + language + '.csv', sep='\t')
+output_df = output_df.loc[output_df['classifier'] == 'LinearSVC']
+
 
 t_test_results_same_n = []
 for n in ns:
@@ -239,7 +241,7 @@ for measure in measures:
         t_test_results_same_measure.append((measure, pair, t_test))
 
 #t-test results visualization
-language = 'rom'
+language = 'fra_90s'
 t_test_results_df_same_n = pd.read_csv(r'results\significant_test_' + language + '_same_n.csv', sep='\t')
 t_test_results_df_same_measure = pd.read_csv(r'results\significant_test_' + language + '_same_measure.csv', sep='\t')
 
@@ -262,7 +264,7 @@ plt.axhline(y=0.05, color='black', linestyle='-')
 #4a
 language = 'fra_80s'
 output_df = pd.read_csv(r'results\classification_results_' + language + '.csv', sep='\t')
-output_df = output_df.loc[output_df['classifier'] == 'LinearSVC']
+output_df = output_df.loc[output_df['classifier'] == 'LogisticRegression']
 output_df = output_df.loc[output_df['N'] == 10]
 
 order = ['RRF', 'χ2', 'LLR', 'Welch', 'Wilcoxon', 'TF-IDF', 'Eta', 'Zeta_orig', 'Zeta_log']
@@ -292,8 +294,8 @@ ax1.set_title('4b. significant_test_fra_80s N = 10')
 #Visualization of other Figures which are not in paper but in Github
 
 # Visualizing significant test between measures, N = 10
-language = 'fra_80s'
-t_test_results_df = pd.read_csv(r'results\significant_test_' + language + '_same_n.csv', sep='\t')
+language = 'fra_90s'
+t_test_results_df = pd.read_csv(r'results\significant_test_' + language + '_same_n_LogReg.csv', sep='\t')
 t_test_results_df_n_10 = t_test_results_df.loc[t_test_results_df_same_n['N'] == 10]
 t_test_confusion_matrix = t_test_results_df_n_10.pivot("measure_1", "measure_2", "pvalue")
 t_test_confusion_matrix = t_test_confusion_matrix.reindex(index = ['RRF', 'χ2', 'LLR', 'Welch', 'Wilcoxon', 'TF-IDF', 'Eta', 'Zeta_orig', 'Zeta_log'])
