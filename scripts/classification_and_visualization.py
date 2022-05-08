@@ -53,10 +53,10 @@ textnames = sorted([os.path.join(segmentfolder, fn) for fn in os.listdir(segment
 labels = []
 for text in textnames:
     textname = os.path.basename(text)[:-4]
-    subgenre = meta_df.loc[meta_df['idno'] == textname.split('-')[0]]['subgenre'].item()
-    labels.append(subgenre)
-    #group = textname.split('_')[0]
-    #labels.append(group)
+    #subgenre = meta_df.loc[meta_df['idno'] == textname.split('-')[0]]['subgenre'].item()
+    #labels.append(subgenre)
+    group = textname.split('_')[0]
+    labels.append(group)
 
 vectorizer = CountVectorizer(input="filename")
 dtm = vectorizer.fit_transform(textnames)
@@ -83,24 +83,18 @@ df_distinctive_words = pd.read_csv(r'C:\Workstation\Trier\Papers_submitted\JCLS_
 df_distinctive_words.rename(columns={'Unnamed: 0':'words'}, inplace=True)
 
 ns = [10, 20, 30, 40, 50, 100, 200, 300, 400, 500, 1000, 2000, 3000, 4000, 5000]
-clf = svm.LinearSVC()
+clfs = [svm.LinearSVC(), MultinomialNB(), LogisticRegression(), tree.DecisionTreeClassifier()]
 measures = ['zeta_sd0','zeta_sd2','rrf_dr0','welsh','ranksum','KL_Divergence','chi_square','LLR','tf_idf','eta_sg0']
 
 f1_all = []
 for measure in measures:
-    for n in ns:
-        f1 = run_classification (n, clf, measure, df_distinctive_words)
-        for i in f1:
-            f1_all.append((n, clf.__class__.__name__, measure, f1.mean(), f1.var(), i))
+    for clf in clfs:
+        for n in ns:
+            f1 = run_classification (n, clf, measure, df_distinctive_words)
+            for i in f1:
+                f1_all.append((n, clf.__class__.__name__, measure, f1.mean(), f1.var(), i))
 
 output_df = pd.DataFrame(f1_all, columns=['N', 'classifier', 'measure', 'f1_macro_mean', 'f1_macro_var', 'F1'])
-
-#a quick check of results by Boxplot-Visualization
-sns.set(font_scale=2)
-sns.set_style("whitegrid")
-f, ax = plt.subplots(figsize = (20,15))
-g = sns.boxplot(x='N', y='F1', data=output_df, hue='measure', showfliers=True, palette="colorblind")
-g.legend(title='measure', loc='best', bbox_to_anchor=(1, 1))
 
 #save the classification results
 output_df.to_csv(r'results\classification_results_rom.csv', sep='\t', index=False)
@@ -173,7 +167,7 @@ output_df.to_csv(r'tests_fr\classification_results\classification_results_fra_90
 ########################################################################################################################
 #Visualizing classification results of four classifiers, french corpus 80s 
 
-output_df = pd.read_csv(r'results\classification_results_fra_80s.csv', sep='\t')
+output_df = pd.read_csv(r'results\classification_results_rom.csv', sep='\t')
 output_df = output_df.loc[output_df['measure'] != 'KL_Divergence']
 
 order = ['RRF', 'χ2', 'LLR', 'Welch', 'Wilcoxon', 'TF-IDF', 'Eta', 'Zeta_orig', 'Zeta_log']
