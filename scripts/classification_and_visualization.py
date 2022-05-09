@@ -182,12 +182,12 @@ g.set_xticklabels(rotation=30)
 ########################################################################################################################
 ########################################################################################################################
 # Visualizing F1-distributions and baseline
-language = 'fra_80s'
+language = 'fra_90s'
 output_df = pd.read_csv(r'results\classification_results_' + language + '.csv', sep='\t')
-output_df = output_df.loc[output_df['classifier'] == 'LogisticRegression']
+output_df = output_df.loc[output_df['classifier'] == 'MultinomialNB']
 output_df = output_df.loc[output_df['measure'] != 'KL_Divergence']
 to_visual_random = pd.read_csv(r'results\random_words_classification_results_' + language + '.csv', sep='\t')
-to_visual_random = to_visual_random.loc[to_visual_random['classifier'] == 'LogisticRegression']
+to_visual_random = to_visual_random.loc[to_visual_random['classifier'] == 'MultinomialNB']
 
 output_df = output_df.sort_values(by=['f1_macro_mean'])
 order = ['RRF', 'χ2', 'LLR', 'Welch', 'Wilcoxon', 'TF-IDF', 'Eta', 'Zeta_orig', 'Zeta_log']
@@ -215,7 +215,7 @@ pairs_n = list(product(ns, ns))
 
 language = 'fra_90s'
 output_df = pd.read_csv(r'results\classification_results_' + language + '.csv', sep='\t')
-output_df = output_df.loc[output_df['classifier'] == 'LinearSVC']
+output_df = output_df.loc[output_df['classifier'] == 'MultinomialNB']
 
 
 t_test_results_same_n = []
@@ -224,7 +224,10 @@ for n in ns:
         f1s_1 = output_df.loc[(output_df['measure'] == pair[0]) & (output_df['N'] == n)]
         f1s_2 = output_df.loc[(output_df['measure'] == pair[1]) & (output_df['N'] == n)]
         t_test = stats.ttest_ind(f1s_1['F1'], f1s_2['F1'])
-        t_test_results_same_n.append((n, pair, t_test))
+        t_test_results_same_n.append((n, pair[0], pair[1], t_test[0], t_test[1]))
+
+t_test_results_df_same_n = pd.DataFrame(t_test_results_same_n, columns=['N', 'measure_1', 'measure_2', 'test_statistic', 'pvalue'])
+t_test_results_df_same_n.to_csv(r'results\significant_test_' + language + '_same_n_NB.csv', sep='\t', index=False)
 
 t_test_results_same_measure = []
 for measure in measures:
@@ -232,12 +235,16 @@ for measure in measures:
         f1s_1 = output_df.loc[(output_df['N'] == pair[0]) & (output_df['measure'] == measure)]
         f1s_2 = output_df.loc[(output_df['N'] == pair[1]) & (output_df['measure'] == measure)]
         t_test = stats.ttest_ind(f1s_1['F1'], f1s_2['F1'])
-        t_test_results_same_measure.append((measure, pair, t_test))
+        t_test_results_same_measure.append((measure, pair[0], pair[1], t_test[0], t_test[1]))
+
+t_test_results_df_same_measure = pd.DataFrame(t_test_results_same_measure, columns=['measure', 'N_1', 'N_2', 'test_statistic', 'pvalue'])
+t_test_results_df_same_measure.to_csv(r'results\significant_test_' + language + '_same_measure_NB.csv', sep='\t', index=False)
+
 
 #t-test results visualization
-language = 'fra_90s'
-t_test_results_df_same_n = pd.read_csv(r'results\significant_test_' + language + '_same_n.csv', sep='\t')
-t_test_results_df_same_measure = pd.read_csv(r'results\significant_test_' + language + '_same_measure.csv', sep='\t')
+language = 'fra_80s'
+t_test_results_df_same_n = pd.read_csv(r'results\significant_test_' + language + '_same_n_NB.csv', sep='\t')
+t_test_results_df_same_measure = pd.read_csv(r'results\significant_test_' + language + '_same_measure_NB.csv', sep='\t')
 
 sns.set(font_scale=2)
 sns.set_style("whitegrid")
@@ -258,7 +265,7 @@ plt.axhline(y=0.05, color='black', linestyle='-')
 #4a
 language = 'fra_80s'
 output_df = pd.read_csv(r'results\classification_results_' + language + '.csv', sep='\t')
-output_df = output_df.loc[output_df['classifier'] == 'LogisticRegression']
+output_df = output_df.loc[output_df['classifier'] == 'MultinomialNB']
 output_df = output_df.loc[output_df['N'] == 10]
 
 order = ['RRF', 'χ2', 'LLR', 'Welch', 'Wilcoxon', 'TF-IDF', 'Eta', 'Zeta_orig', 'Zeta_log']
@@ -289,7 +296,7 @@ ax1.set_title('4b. significant_test_fra_80s N = 10')
 
 # Visualizing significant test between measures, N = 10
 language = 'fra_90s'
-t_test_results_df = pd.read_csv(r'results\significant_test_' + language + '_same_n_LogReg.csv', sep='\t')
+t_test_results_df = pd.read_csv(r'results\significant_test_' + language + '_same_n_NB.csv', sep='\t')
 t_test_results_df_n_10 = t_test_results_df.loc[t_test_results_df_same_n['N'] == 10]
 t_test_confusion_matrix = t_test_results_df_n_10.pivot("measure_1", "measure_2", "pvalue")
 t_test_confusion_matrix = t_test_confusion_matrix.reindex(index = ['RRF', 'χ2', 'LLR', 'Welch', 'Wilcoxon', 'TF-IDF', 'Eta', 'Zeta_orig', 'Zeta_log'])
