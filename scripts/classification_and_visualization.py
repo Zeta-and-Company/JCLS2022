@@ -79,7 +79,7 @@ def run_classification (n, clf, measures, df_distinctive_words):
     print(f1.mean())
     return f1
 
-df_distinctive_words = pd.read_csv(r'C:\Workstation\Trier\Papers_submitted\JCLS_2022\tests_ELTeC\ELTeC-rom\output_ELTeC-rom\results\results_5000-lemmata-all_group_T4_1900-20-T2_1860-79.csv', sep='\t')
+df_distinctive_words = pd.read_csv(r'C:\Workstation\Trier\Papers_submitted\JCLS_2022\tests_ELTeC\ELTeC-eng\output_ELTeC-eng\results\results_5000-lemmata-all_group_T4_1900-20-T2_1860-79.csv', sep='\t')
 df_distinctive_words.rename(columns={'Unnamed: 0':'words'}, inplace=True)
 
 ns = [10, 20, 30, 40, 50, 100, 200, 300, 400, 500, 1000, 2000, 3000, 4000, 5000]
@@ -97,7 +97,7 @@ for measure in measures:
 output_df = pd.DataFrame(f1_all, columns=['N', 'classifier', 'measure', 'f1_macro_mean', 'f1_macro_var', 'F1'])
 
 #save the classification results
-output_df.to_csv(r'results\classification_results_rom.csv', sep='\t', index=False)
+output_df.to_csv(r'results\classification_results_eng.csv', sep='\t', index=False)
 
 #####################################################################################################################################
 #####################################################################################################################################
@@ -242,9 +242,9 @@ t_test_results_df_same_measure.to_csv(r'results\significant_test_' + language + 
 
 
 #t-test results visualization
-language = 'fra_80s'
-t_test_results_df_same_n = pd.read_csv(r'results\significant_test_' + language + '_same_n_NB.csv', sep='\t')
-t_test_results_df_same_measure = pd.read_csv(r'results\significant_test_' + language + '_same_measure_NB.csv', sep='\t')
+language = 'cze'
+t_test_results_df_same_n = pd.read_csv(r'results\significant_test_' + language + '_same_n.csv', sep='\t')
+t_test_results_df_same_measure = pd.read_csv(r'results\significant_test_' + language + '_same_measure.csv', sep='\t')
 
 sns.set(font_scale=2)
 sns.set_style("whitegrid")
@@ -263,10 +263,11 @@ plt.axhline(y=0.05, color='black', linestyle='-')
 #fra_80s results visualization N = 10, Figure 4a and 4b
 
 #4a
-language = 'fra_80s'
+language = 'cze'
 output_df = pd.read_csv(r'results\classification_results_' + language + '.csv', sep='\t')
 output_df = output_df.loc[output_df['classifier'] == 'MultinomialNB']
 output_df = output_df.loc[output_df['N'] == 10]
+
 
 order = ['RRF', 'χ2', 'LLR', 'Welch', 'Wilcoxon', 'TF-IDF', 'Eta', 'Zeta_orig', 'Zeta_log']
 sns.set(font_scale=2)
@@ -287,6 +288,23 @@ sns.set_style("whitegrid")
 f, ax1 = plt.subplots(figsize = (15,10))
 sns.heatmap(t_test_confusion_matrix, annot=True, cmap="vlag", vmin=0, vmax=0.05, cbar_kws={'extend': 'max'}, ax=ax1, annot_kws={"fontsize":16})
 ax1.set_title('4b. significant_test_fra_80s N = 10')
+
+########################################################################################################################
+########################################################################################################################
+########################################################################################################################
+# Visualizing mean F1-scores of ELTeC datasets
+
+df = pd.read_csv(r'results\classification_results_mean_F1_7_ELTeC_corpora.csv', sep='\t')
+df = pd.melt(df, id_vars='measure', value_vars=['eng',	'deu',	'fra',	'por',	'rom',	'hun',	'cze',	'average_score'])
+df.columns = ['measure', 'language', 'F1_mean']
+
+order = ['RRF', 'χ2', 'LLR', 'Welch', 'Wilcoxon', 'TF-IDF', 'Eta', 'Zeta_orig', 'Zeta_log']
+
+sns.set(font_scale=2)
+sns.set_style("whitegrid")
+f, ax = plt.subplots(figsize = (16,10))
+g = sns.barplot(x="language", y="F1_mean", data=df, hue = 'measure', palette="colorblind", hue_order = order)
+g.legend(title='measure', loc='best', bbox_to_anchor=(1, 1))
 
 
 ########################################################################################################################
